@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강의 정보 페이지</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: black;
+            color: white;
+            font-size: 6em; /* 기본 글자 크기를 현재 크기의 3배로 확대 */
+            overflow: hidden;
+            position: relative;
+        }
+        #companyName, #lectureTitleDisplay, #timerTextDisplay, #countdown, #currentTime {
+            margin: 20px 0;
+            z-index: 10;
+            position: relative;
+        }
+        #currentTime {
+            color: yellow; /* 시간을 노란색으로 표시 */
+        }
+        .icon {
+            margin-right: 10px;
+            font-size: 0.5em; /* 아이콘 크기를 조절 */
+        }
+        .raindrop {
+            position: absolute;
+            animation: fall linear infinite;
+            color: white;
+            font-size: 0.5em; /* 글자 크기를 현재 크기의 3배로 확대 */
+            opacity: 0.7;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="companyNameDisplay" onclick="editCompanyName()"><span class="icon">🌟</span>회사 이름을 클릭하여 수정하세요</div>
+    <input type="text" id="companyNameInput" style="display: none; font-size: 0.5em;" onblur="saveCompanyName()">
+    <div id="lectureTitleDisplay" onclick="editLectureTitle()">강의 제목을 클릭하여 수정하세요</div>
+    <input type="text" id="lectureTitleInput" style="display: none; font-size: 0.5em;" onblur="saveLectureTitle()">
+    <div id="timerTextDisplay" onclick="editTimerText()">수업 시간을 작성하세요</div>
+    <input type="time" id="timerTextInput" style="display: none; font-size: 0.5em;" onblur="saveTimerText()">
+    <div id="countdown"></div>
+    <div id="currentTime"></div>
+
+    <script>
+        let targetTime = null;
+
+        function createRaindrop() {
+            const drop = document.createElement('div');
+            drop.classList.add('raindrop');
+            drop.textContent = String.fromCharCode(Math.floor(Math.random() * (122 - 97 + 1)) + 97); // 무작위 소문자
+            drop.style.left = Math.random() * 100 + 'vw';
+            drop.style.animationDuration = Math.random() * 2 + 2 + 's';
+            drop.style.top = -20 + 'px';
+            document.body.appendChild(drop);
+
+            setTimeout(() => {
+                document.body.removeChild(drop);
+            }, 4000);
+        }
+
+        setInterval(createRaindrop, 100);
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            document.getElementById('currentTime').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+            if (targetTime) {
+                const diff = targetTime - now;
+                if (diff > 0) {
+                    const diffHours = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
+                    const diffMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                    const diffSeconds = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+                    document.getElementById('countdown').innerText = `${diffHours}시 ${diffMinutes}분 ${diffSeconds}초 남았습니다.`;
+                }
+            }
+        }
+
+        function editCompanyName() {
+            const display = document.getElementById('companyNameDisplay');
+            const input = document.getElementById('companyNameInput');
+            input.value = '';
+            display.style.display = 'none';
+            input.style.display = 'block';
+            input.focus();
+        }
+
+        function saveCompanyName() {
+            const display = document.getElementById('companyNameDisplay');
+            const input = document.getElementById('companyNameInput');
+            if (input.value.trim() === '') {
+                display.innerHTML = `<span class="icon">🌟</span>회사 이름을 클릭하여 수정하세요`;
+            } else {
+                display.innerHTML = `<span class="icon">🌟</span>${input.value}`;
+            }
+            display.style.display = 'block';
+            input.style.display = 'none';
+        }
+
+        function editLectureTitle() {
+            const display = document.getElementById('lectureTitleDisplay');
+            const input = document.getElementById('lectureTitleInput');
+            input.value = '';
+            display.style.display = 'none';
+            input.style.display = 'block';
+            input.focus();
+        }
+
+        function saveLectureTitle() {
+            const display = document.getElementById('lectureTitleDisplay');
+            const input = document.getElementById('lectureTitleInput');
+            if (input.value.trim() === '') {
+                display.textContent = '강의 제목을 클릭하여 수정하세요';
+            } else {
+                display.textContent = input.value;
+            }
+            display.style.display = 'block';
+            input.style.display = 'none';
+        }
+
+        function editTimerText() {
+            const display = document.getElementById('timerTextDisplay');
+            const input = document.getElementById('timerTextInput');
+            display.style.display = 'none';
+            input.style.display = 'block';
+            input.focus();
+        }
+
+        function saveTimerText() {
+            const display = document.getElementById('timerTextDisplay');
+            const input = document.getElementById('timerTextInput');
+            const [hours, minutes] = input.value.split(':');
+            const now = new Date();
+            targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+            display.textContent = `${hours}시 ${minutes}분에 시작해요!`;
+            display.style.display = 'block';
+            input.style.display = 'none';
+        }
+
+        setInterval(updateCurrentTime, 1000);
+    </script>
+</body>
+</html>
